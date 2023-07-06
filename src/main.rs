@@ -102,6 +102,8 @@ fn notify(
         .body(message);
     if let Some(icon_path) = icon {
         notif.icon(&icon_path);
+    } else {
+        notif.auto_icon();
     }
     notif.show()?;
     Ok(())
