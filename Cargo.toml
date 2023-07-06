@@ -1,0 +1,19 @@
+[package]
+name = "blight-notify"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+argh = "0.1.10"
+env_logger = "0.10.0"
+log = "0.4.19"
+notify = "5.0.0"
+notify-rust = "4.8.0"
+
+[profile.release]
+strip = true
+panic = "abort"
+lto = true
+codegen-units = 1
