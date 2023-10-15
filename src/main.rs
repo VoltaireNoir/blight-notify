@@ -1,6 +1,6 @@
 use argh::FromArgs;
 use env_logger::Env;
-use log::{error, info};
+use log::{debug, error, info};
 use notify::{Config as NotifyConfig, Event, PollWatcher, RecursiveMode, Watcher};
 use notify_rust::{error::Error as NotifyError, Notification, Timeout, Urgency};
 use std::{
@@ -55,7 +55,13 @@ fn main() -> Result<(), Box<dyn Error>> {
     if !conf.quiet {
         init_logging(conf.debug);
     }
-    let (mut watcher, r) = init_watcher(conf.pollrate)?;
+    let (mut watcher, r) = match init_watcher(conf.pollrate) {
+        Ok(w) => w,
+        Err(err) => {
+            error!("{err}");
+            return Err("failed to initialize watcher".into());
+        }
+    };
     watch(&mut watcher)?;
     loop {
         let v = r.recv()?;
@@ -70,9 +76,10 @@ fn main() -> Result<(), Box<dyn Error>> {
         } else {
             None
         };
-
+        debug!("change detected: received value {v}, spam: {:?}", spam);
         let fval = spam.unwrap_or(v);
         let message = format!("{} {}%", conf.message, (fval * 100.) as u8);
+        debug!("sending message: {message}");
         if let Err(error) = notify(&message, &conf.title, conf.icon.as_ref(), conf.timeout) {
             error!("{error}");
         }
