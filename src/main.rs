@@ -11,7 +11,7 @@ use std::{
     time::Duration,
 };
 
-#[derive(FromArgs)]
+#[derive(FromArgs, Debug)]
 #[argh(description = "A simple backlight notification daemon")]
 struct Config {
     #[argh(
@@ -55,6 +55,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     if !conf.quiet {
         init_logging(conf.debug);
     }
+    info!("blight-notify daemon started");
+    debug!("with {conf:?}");
     let (mut watcher, r) = match init_watcher(conf.pollrate) {
         Ok(w) => w,
         Err(err) => {
@@ -90,7 +92,6 @@ fn init_logging(debug: bool) {
     let level = if debug { "debug" } else { "info" };
     let env = Env::new().filter_or("RUST_LOG", level);
     env_logger::init_from_env(env);
-    info!("blight-notify daemon started");
 }
 
 fn notify(
